@@ -11,6 +11,7 @@ __pycache__/
 build/
 develop-eggs/
 dist/
+frontend/dist/
 downloads/
 eggs/
 .eggs/
@@ -137,6 +138,7 @@ celerybeat.pid
 # Environments
 .env
 .envrc
+.env.local
 .venv
 env/
 venv/
@@ -190,6 +192,9 @@ cython_debug/
 
 # Ruff stuff:
 .ruff_cache/
+
+# Node
+node_modules/
 
 # PyPI configuration file
 .pypirc
