@@ -42,11 +42,26 @@ export default createStore({
       commit("setLoading", true);
       commit("setError", null);
       try {
-        const response = await fetch(`${API_BASE_URL}/books/`);
-        const data = await response.json();
-        commit("setBooks", data.results || []);
+        let nextUrl = `${API_BASE_URL}/books/`;
+        const allBooks = [];
+        while (nextUrl) {
+          const response = await fetch(nextUrl);
+          const data = await response.json();
+          if (!response.ok) {
+            const detail = data?.detail || "Unable to load books.";
+            throw new Error(detail);
+          }
+          if (Array.isArray(data)) {
+            allBooks.push(...data);
+            nextUrl = null;
+          } else {
+            allBooks.push(...(data.results || []));
+            nextUrl = data.next;
+          }
+        }
+        commit("setBooks", allBooks);
       } catch (error) {
-        commit("setError", "Unable to load books.");
+        commit("setError", error.message || "Unable to load books.");
       } finally {
         commit("setLoading", false);
       }
@@ -62,9 +77,13 @@ export default createStore({
           body: JSON.stringify(payload)
         });
         const data = await response.json();
+        if (!response.ok) {
+          const detail = data?.detail || "Unable to add book.";
+          throw new Error(detail);
+        }
         commit("addBook", data);
       } catch (error) {
-        commit("setError", "Unable to add book.");
+        commit("setError", error.message || "Unable to add book.");
       }
     },
     async updateStatus({ commit }, { id, status }) {
@@ -78,9 +97,13 @@ export default createStore({
           body: JSON.stringify({ status })
         });
         const data = await response.json();
+        if (!response.ok) {
+          const detail = data?.detail || "Unable to update status.";
+          throw new Error(detail);
+        }
         commit("updateBook", data);
       } catch (error) {
-        commit("setError", "Unable to update status.");
+        commit("setError", error.message || "Unable to update status.");
       }
     }
   }
